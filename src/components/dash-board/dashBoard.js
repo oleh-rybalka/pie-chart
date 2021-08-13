@@ -1,36 +1,16 @@
-import { Box, IconButton, makeStyles, Paper } from '@material-ui/core';
+import { Box, IconButton, makeStyles } from '@material-ui/core';
 import KeyboardArrowUpSharpIcon from '@material-ui/icons/KeyboardArrowUpSharp';
 import KeyboardArrowDownSharpIcon from '@material-ui/icons/KeyboardArrowDownSharp';
-import DashBoardBody from './dashBoardBody';
-import DashBoardHeader from './dashBoardHeader';
-import dashBoardTitles from '../../data/dashBoardTitle.json';
-import './dashBoard.css';
-import { useState } from 'react';
 import { CSSTransition } from 'react-transition-group';
+import { useState } from 'react';
+import dashBoardTitles from '../../data/dashBoardTitle.json';
+import DashBoardWrapper from './DashBoardWrapper';
+import { dashBoardStyles } from '../../styles/dashBoardStyles';
+import './dashBoard.css';
 
-const useStyles = makeStyles(() => ({
-  arrow: {
-    position: 'absolute',
-    top: '4px',
-    right: '10px',
-    fontSize: '30px',
-    background: 'gray',
-    width: '30px',
-    height: '30px',
-  },
-  dashboard: {
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  arrowIcon: {
-    fontSize: '30px',
-  },
-  dashboardHeader: {
-    zIndex: 10000,
-  },
-}));
+const useStyles = makeStyles(() => dashBoardStyles);
 
-export default function DashBoard({ dashboardNumber }) {
+export default function DashBoard({ dashboard, user }) {
   const classes = useStyles();
   const [showBar, setShowBar] = useState(true);
   const handleShowBar = () => {
@@ -38,68 +18,48 @@ export default function DashBoard({ dashboardNumber }) {
   };
   return (
     <>
-      {dashboardNumber === 1 ? (
-        <Box m={1}>
-          <Paper square className={classes.dashboard} elevation={10}>
-            <IconButton
-              className={classes.arrow}
-              aria-label="hide-show"
-              onClick={handleShowBar}
-            >
-              {showBar ? (
-                <KeyboardArrowUpSharpIcon className={classes.arrowIcon} />
-              ) : (
-                <KeyboardArrowDownSharpIcon className={classes.arrowIcon} />
-              )}
-            </IconButton>
-            <DashBoardHeader
-              className={classes.dashboardHeader}
-              titles={dashBoardTitles.firstDashboard}
-            />
-          </Paper>
-          <div className="body">
-            <CSSTransition
-              unmountOnExit
-              in={showBar}
-              timeout={200}
-              classNames="dashBoard"
-            >
-              <DashBoardBody titles={dashBoardTitles.firstDashboard} />
-            </CSSTransition>
-          </div>
-        </Box>
-      ) : (
-        <Box m={1}>
-          <Paper square className={classes.dashboard} elevation={10}>
-            <IconButton
-              className={classes.arrow}
-              aria-label="hide-show"
-              onClick={handleShowBar}
-            >
-              {showBar ? (
-                <KeyboardArrowUpSharpIcon className={classes.arrowIcon} />
-              ) : (
-                <KeyboardArrowDownSharpIcon className={classes.arrowIcon} />
-              )}
-            </IconButton>
+      <Box m={1} width={1400} className={classes.dashboard}>
+        <IconButton
+          className={classes.arrow}
+          aria-label="hide-show"
+          onClick={handleShowBar}
+        >
+          {showBar ? (
+            <KeyboardArrowUpSharpIcon className={classes.arrowIcon} />
+          ) : (
+            <KeyboardArrowDownSharpIcon className={classes.arrowIcon} />
+          )}
+        </IconButton>
+        <DashBoardWrapper
+          showBar={showBar}
+          titles={
+            showBar
+              ? user === 'user'
+                ? dashBoardTitles.user[dashboard]
+                : dashBoardTitles.master[dashboard]
+              : ['View Dashboard']
+          }
+          dashboard="header"
+        />
 
-            <DashBoardHeader
-              className={classes.dashboardHeader}
-              titles={dashBoardTitles.secondDashboard}
+        <CSSTransition
+          unmountOnExit
+          in={showBar}
+          timeout={200}
+          classNames="dashBoard"
+        >
+          <div className={'body'}>
+            <DashBoardWrapper
+              titles={
+                user === 'user'
+                  ? dashBoardTitles.user[dashboard]
+                  : dashBoardTitles.master[dashboard]
+              }
+              dashboard="body"
             />
-          </Paper>
-          <div className="body">
-            <CSSTransition
-              unmountOnExit
-              in={showBar}
-              timeout={200}
-              classNames="dashBoard"
-            >
-              <DashBoardBody titles={dashBoardTitles.secondDashboard} />
-            </CSSTransition>
           </div>
-        </Box>
-      )}
+        </CSSTransition>
+      </Box>
     </>
   );
 }
